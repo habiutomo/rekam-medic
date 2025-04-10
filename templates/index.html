@@ -1,0 +1,292 @@
+{% extends "layout.html" %}
+{% set title = "Dashboard" %}
+
+{% block content %}
+{% if current_user.is_authenticated %}
+    <!-- Dashboard for authenticated users -->
+    <div class="row">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2 dashboard-card">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Total Patients
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold">124</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-people fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2 dashboard-card">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Today's Appointments
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold">18</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-calendar3 fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2 dashboard-card">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Lab Results Pending
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold">5</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-flask fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2 dashboard-card">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                New Prescriptions
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold">11</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-prescription fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Today's Appointments -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-dark">
+                    <h6 class="mb-0 fw-bold">Today's Appointments</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Patient</th>
+                                    <th>Doctor</th>
+                                    <th>Type</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Sample data for UI display -->
+                                <tr>
+                                    <td>08:00</td>
+                                    <td>John Doe</td>
+                                    <td>Dr. Smith</td>
+                                    <td>General Checkup</td>
+                                    <td><span class="badge bg-success">Completed</span></td>
+                                </tr>
+                                <tr>
+                                    <td>09:15</td>
+                                    <td>Jane Smith</td>
+                                    <td>Dr. Johnson</td>
+                                    <td>Follow-up</td>
+                                    <td><span class="badge bg-primary">In Progress</span></td>
+                                </tr>
+                                <tr>
+                                    <td>10:30</td>
+                                    <td>Robert Brown</td>
+                                    <td>Dr. Wilson</td>
+                                    <td>Consultation</td>
+                                    <td><span class="badge bg-secondary">Waiting</span></td>
+                                </tr>
+                                <tr>
+                                    <td>11:45</td>
+                                    <td>Sarah Lee</td>
+                                    <td>Dr. Davis</td>
+                                    <td>Lab Results</td>
+                                    <td><span class="badge bg-warning">Scheduled</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer bg-dark">
+                    <a href="{{ url_for('appointments.index') }}" class="btn btn-sm btn-info">
+                        <i class="bi bi-calendar-week me-1"></i> View All Appointments
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activities and Stats -->
+    <div class="row">
+        <!-- Recent Activities -->
+        <div class="col-lg-8 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-dark">
+                    <h6 class="mb-0 fw-bold">Recent Activities</h6>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-date">Now</div>
+                            <div class="timeline-content">
+                                <p class="mb-0"><strong>Dr. Smith</strong> completed an appointment with <strong>John Doe</strong>.</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-date">2h</div>
+                            <div class="timeline-content">
+                                <p class="mb-0"><strong>Nurse Williams</strong> recorded vital signs for <strong>Patient #103</strong>.</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-date">3h</div>
+                            <div class="timeline-content">
+                                <p class="mb-0"><strong>Dr. Johnson</strong> prescribed medication for <strong>Sarah Lee</strong>.</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-date">5h</div>
+                            <div class="timeline-content">
+                                <p class="mb-0"><strong>Lab Technician</strong> uploaded lab results for <strong>Robert Brown</strong>.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics -->
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-dark">
+                    <h6 class="mb-0 fw-bold">Statistics</h6>
+                </div>
+                <div class="card-body">
+                    <canvas id="appointmentChart" width="400" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+{% else %}
+    <!-- Welcome page for non-authenticated users -->
+    <div class="row justify-content-center fade-in">
+        <div class="col-md-10 col-lg-8">
+            <div class="card shadow-lg border-0">
+                <div class="card-body p-5 text-center">
+                    <h1 class="display-4 mb-4">
+                        <i class="bi bi-clipboard2-pulse text-info me-2"></i>
+                        Welcome to RME System
+                    </h1>
+                    <p class="lead mb-4">
+                        A comprehensive Electronic Medical Records (RME) system with patient management, 
+                        appointment scheduling, and clinical documentation capabilities.
+                    </p>
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-center mt-4">
+                        <a href="{{ url_for('auth.login') }}" class="btn btn-info btn-lg px-4 me-md-2">
+                            <i class="bi bi-box-arrow-in-right me-2"></i> Login to System
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mt-5">
+                <div class="col-md-4 mb-4">
+                    <div class="card text-center h-100 shadow-sm">
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <i class="bi bi-people display-4 text-info"></i>
+                            </div>
+                            <h5 class="card-title">Patient Management</h5>
+                            <p class="card-text">Comprehensive patient records with medical history, demographics, and visit tracking.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="card text-center h-100 shadow-sm">
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <i class="bi bi-calendar-check display-4 text-info"></i>
+                            </div>
+                            <h5 class="card-title">Appointment Scheduling</h5>
+                            <p class="card-text">Efficient scheduling system with calendar integration and reminder capabilities.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="card text-center h-100 shadow-sm">
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <i class="bi bi-journal-medical display-4 text-info"></i>
+                            </div>
+                            <h5 class="card-title">Clinical Documentation</h5>
+                            <p class="card-text">Structured documentation for visits, diagnoses, treatments, and care plans.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{% if current_user.is_authenticated %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Chart for appointments by status
+        const ctx = document.getElementById('appointmentChart').getContext('2d');
+        const appointmentChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Scheduled', 'Completed', 'Cancelled', 'No-Show'],
+                datasets: [{
+                    data: [15, 8, 3, 1],
+                    backgroundColor: [
+                        '#28a745',
+                        '#007bff',
+                        '#dc3545',
+                        '#ffc107'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    },
+                    title: {
+                        display: true,
+                        text: 'Appointments by Status'
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,215 @@
+{% extends "layout.html" %}
+
+{% block page_actions %}
+<div class="btn-group">
+    <a href="{{ url_for('prescriptions.index', patient_id=prescription.patient_id) }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i> Back to Prescriptions
+    </a>
+    <a href="{{ url_for('prescriptions.edit_prescription', prescription_id=prescription.id) }}" class="btn btn-outline-secondary">
+        <i class="bi bi-pencil me-1"></i> Edit
+    </a>
+    <a href="{{ url_for('patients.view_patient', patient_id=prescription.patient_id) }}" class="btn btn-info">
+        <i class="bi bi-person me-1"></i> Patient Profile
+    </a>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="card shadow mb-4">
+    <div class="card-header prescription-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h5 class="mb-0">Prescription #{{ prescription.id }}</h5>
+                <p class="mb-0 text-muted">
+                    Prescribed on {{ prescription.prescription_date|format_date('%B %d, %Y') }} by {{ prescription.prescribed_by.get_full_name() }}
+                </p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <span class="badge bg-{{ 
+                    'success' if prescription.status == 'active' else 
+                    'primary' if prescription.status == 'completed' else 
+                    'danger' }}">
+                    {{ prescription.status|capitalize }}
+                </span>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <h6 class="text-info mb-2">Patient Information</h6>
+                <div class="card bg-dark">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="patient-avatar me-3" style="width: 50px; height: 50px; font-size: 1.5rem;">
+                                <i class="bi bi-person"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-0">{{ prescription.patient.get_full_name() }}</h5>
+                                <p class="mb-0 text-muted small">
+                                    {{ prescription.patient.gender }}, {{ prescription.patient.get_age() }} years old
+                                    {% if prescription.patient.blood_type %}
+                                    <span class="badge bg-danger ms-1">{{ prescription.patient.blood_type }}</span>
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <small class="text-muted">Patient ID:</small>
+                                <p class="mb-0">{{ prescription.patient.id }}</p>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted">DOB:</small>
+                                <p class="mb-0">{{ prescription.patient.date_of_birth|format_date('%Y-%m-%d') }}</p>
+                            </div>
+                            <div class="col-12 mt-2">
+                                <small class="text-muted">Allergies:</small>
+                                <p class="mb-0">{{ prescription.patient.allergies or 'None reported' }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <h6 class="text-info mb-2">Prescription Details</h6>
+                <div class="card bg-dark">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="patient-avatar bg-info me-3" style="width: 50px; height: 50px; font-size: 1.5rem;">
+                                <i class="bi bi-prescription"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-0">Prescription #{{ prescription.id }}</h5>
+                                <p class="mb-0 text-muted small">
+                                    {{ prescription.status|capitalize }}
+                                </p>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <small class="text-muted">Date:</small>
+                                <p class="mb-0">{{ prescription.prescription_date|format_date('%Y-%m-%d') }}</p>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted">Prescribed By:</small>
+                                <p class="mb-0">{{ prescription.prescribed_by.get_full_name() }}</p>
+                            </div>
+                            {% if prescription.notes %}
+                            <div class="col-12 mt-2">
+                                <small class="text-muted">Notes:</small>
+                                <p class="mb-0">{{ prescription.notes }}</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <h6 class="text-info mb-3">Medications</h6>
+        
+        {% if prescription.items %}
+        <div class="table-responsive mb-3">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Medication</th>
+                        <th>Dosage</th>
+                        <th>Frequency</th>
+                        <th>Duration</th>
+                        <th>Instructions</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in prescription.items %}
+                    <tr>
+                        <td>{{ item.medication.name }}</td>
+                        <td>{{ item.dosage }}</td>
+                        <td>{{ item.frequency }}</td>
+                        <td>{{ item.duration }}</td>
+                        <td>{{ item.instructions or 'N/A' }}</td>
+                        <td>
+                            <form action="{{ url_for('prescriptions.delete_item', prescription_id=prescription.id, item_id=item.id) }}" method="POST" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to remove this medication?')">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-warning">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            No medications have been added to this prescription yet.
+        </div>
+        {% endif %}
+        
+        <div class="d-flex justify-content-center my-3">
+            <a href="{{ url_for('prescriptions.add_item', prescription_id=prescription.id) }}" class="btn btn-outline-info">
+                <i class="bi bi-plus-lg me-1"></i> Add Medication
+            </a>
+        </div>
+    </div>
+    <div class="card-footer">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <small class="text-muted">Created: {{ prescription.created_at|format_date('%Y-%m-%d %H:%M') }}</small>
+                {% if prescription.created_at != prescription.updated_at %}
+                <small class="text-muted ms-3">Last updated: {{ prescription.updated_at|format_date('%Y-%m-%d %H:%M') }}</small>
+                {% endif %}
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-sm btn-outline-secondary" onclick="window.print()">
+                    <i class="bi bi-printer me-1"></i> Print
+                </button>
+                <!-- This would be for a PDF download feature -->
+                <button class="btn btn-sm btn-outline-secondary" disabled>
+                    <i class="bi bi-file-pdf me-1"></i> PDF
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions Card -->
+<div class="card shadow">
+    <div class="card-header">
+        <h5 class="mb-0">Quick Actions</h5>
+    </div>
+    <div class="card-body">
+        <div class="row text-center">
+            <div class="col-md-3 mb-3">
+                <a href="{{ url_for('prescriptions.add_item', prescription_id=prescription.id) }}" class="btn btn-outline-info w-100 h-100 py-3">
+                    <i class="bi bi-plus-circle d-block mb-2" style="font-size: 1.5rem;"></i>
+                    Add Medication
+                </a>
+            </div>
+            <div class="col-md-3 mb-3">
+                <a href="{{ url_for('clinical.new_note', patient_id=prescription.patient_id) }}" class="btn btn-outline-info w-100 h-100 py-3">
+                    <i class="bi bi-journal-plus d-block mb-2" style="font-size: 1.5rem;"></i>
+                    Clinical Note
+                </a>
+            </div>
+            <div class="col-md-3 mb-3">
+                <a href="{{ url_for('laboratory.new_result', patient_id=prescription.patient_id) }}" class="btn btn-outline-info w-100 h-100 py-3">
+                    <i class="bi bi-flask d-block mb-2" style="font-size: 1.5rem;"></i>
+                    Lab Test
+                </a>
+            </div>
+            <div class="col-md-3 mb-3">
+                <a href="{{ url_for('appointments.new_appointment', patient_id=prescription.patient_id) }}" class="btn btn-outline-info w-100 h-100 py-3">
+                    <i class="bi bi-calendar-plus d-block mb-2" style="font-size: 1.5rem;"></i>
+                    Schedule Follow-up
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

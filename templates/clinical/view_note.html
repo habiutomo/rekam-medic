@@ -1,0 +1,178 @@
+{% extends "layout.html" %}
+
+{% block page_actions %}
+<div class="btn-group">
+    <a href="{{ url_for('clinical.notes', patient_id=note.patient_id) }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i> Back to Notes
+    </a>
+    <a href="{{ url_for('clinical.edit_note', note_id=note.id) }}" class="btn btn-outline-secondary">
+        <i class="bi bi-pencil me-1"></i> Edit
+    </a>
+    <a href="{{ url_for('patients.view_patient', patient_id=note.patient_id) }}" class="btn btn-info">
+        <i class="bi bi-person me-1"></i> Patient Profile
+    </a>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="card shadow mb-4">
+    <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">{{ note.note_type|capitalize }} Note</h5>
+            <span class="badge bg-info">{{ note.created_at|format_date('%Y-%m-%d %H:%M') }}</span>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <h6 class="text-info mb-2">Patient Information</h6>
+                <div class="card bg-dark">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="patient-avatar me-3" style="width: 50px; height: 50px; font-size: 1.5rem;">
+                                <i class="bi bi-person"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-0">{{ note.patient.get_full_name() }}</h5>
+                                <p class="mb-0 text-muted small">
+                                    {{ note.patient.gender }}, {{ note.patient.get_age() }} years old
+                                    {% if note.patient.blood_type %}
+                                    <span class="badge bg-danger ms-1">{{ note.patient.blood_type }}</span>
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <small class="text-muted">Patient ID:</small>
+                                <p class="mb-0">{{ note.patient.id }}</p>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted">DOB:</small>
+                                <p class="mb-0">{{ note.patient.date_of_birth|format_date('%Y-%m-%d') }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <h6 class="text-info mb-2">Author Information</h6>
+                <div class="card bg-dark">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="patient-avatar bg-info me-3" style="width: 50px; height: 50px; font-size: 1.5rem;">
+                                <i class="bi bi-person-vcard"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-0">{{ note.author.get_full_name() }}</h5>
+                                <p class="mb-0 text-muted small">
+                                    {{ note.author.role.name|capitalize }}
+                                </p>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <small class="text-muted">Username:</small>
+                                <p class="mb-0">{{ note.author.username }}</p>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted">Date Created:</small>
+                                <p class="mb-0">{{ note.created_at|format_date('%Y-%m-%d %H:%M') }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <h6 class="text-info mb-2">Clinical Content</h6>
+        <div class="card bg-dark mb-4">
+            <div class="card-body">
+                <p style="white-space: pre-wrap;">{{ note.content }}</p>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <h6 class="text-info mb-2">Diagnosis</h6>
+                <div class="card bg-dark h-100">
+                    <div class="card-body">
+                        {% if note.diagnosis %}
+                        <p style="white-space: pre-wrap;">{{ note.diagnosis }}</p>
+                        {% else %}
+                        <p class="text-muted fst-italic">No diagnosis provided</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <h6 class="text-info mb-2">Treatment Plan</h6>
+                <div class="card bg-dark h-100">
+                    <div class="card-body">
+                        {% if note.treatment_plan %}
+                        <p style="white-space: pre-wrap;">{{ note.treatment_plan }}</p>
+                        {% else %}
+                        <p class="text-muted fst-italic">No treatment plan provided</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-footer">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <small class="text-muted">Created: {{ note.created_at|format_date('%Y-%m-%d %H:%M') }}</small>
+                {% if note.created_at != note.updated_at %}
+                <small class="text-muted ms-3">Last updated: {{ note.updated_at|format_date('%Y-%m-%d %H:%M') }}</small>
+                {% endif %}
+            </div>
+            <div class="btn-group">
+                <a href="{{ url_for('clinical.edit_note', note_id=note.id) }}" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-pencil me-1"></i> Edit
+                </a>
+                <button class="btn btn-sm btn-outline-secondary" onclick="window.print()">
+                    <i class="bi bi-printer me-1"></i> Print
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions Card -->
+<div class="card shadow">
+    <div class="card-header">
+        <h5 class="mb-0">Quick Actions</h5>
+    </div>
+    <div class="card-body">
+        <div class="row text-center">
+            <div class="col-md-3 mb-3">
+                <a href="{{ url_for('prescriptions.new_prescription', patient_id=note.patient_id) }}" class="btn btn-outline-info w-100 h-100 py-3">
+                    <i class="bi bi-prescription d-block mb-2" style="font-size: 1.5rem;"></i>
+                    Create Prescription
+                </a>
+            </div>
+            <div class="col-md-3 mb-3">
+                <a href="{{ url_for('laboratory.new_result', patient_id=note.patient_id) }}" class="btn btn-outline-info w-100 h-100 py-3">
+                    <i class="bi bi-flask d-block mb-2" style="font-size: 1.5rem;"></i>
+                    Order Lab Test
+                </a>
+            </div>
+            <div class="col-md-3 mb-3">
+                <a href="{{ url_for('appointments.new_appointment', patient_id=note.patient_id) }}" class="btn btn-outline-info w-100 h-100 py-3">
+                    <i class="bi bi-calendar-plus d-block mb-2" style="font-size: 1.5rem;"></i>
+                    Schedule Follow-up
+                </a>
+            </div>
+            <div class="col-md-3 mb-3">
+                <a href="{{ url_for('clinical.new_note', patient_id=note.patient_id) }}" class="btn btn-outline-info w-100 h-100 py-3">
+                    <i class="bi bi-journal-plus d-block mb-2" style="font-size: 1.5rem;"></i>
+                    New Note
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

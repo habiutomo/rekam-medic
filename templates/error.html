@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+{% set title = "Error" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-body text-center p-5">
+                <h1 class="display-1 text-danger mb-4">
+                    <i class="bi bi-exclamation-triangle"></i>
+                </h1>
+                <h2 class="mb-4">Oops! {{ error }}</h2>
+                <p class="text-muted mb-4">
+                    Something went wrong. Please try again or contact the administrator if the problem persists.
+                </p>
+                <a href="{{ url_for('index') }}" class="btn btn-info">
+                    <i class="bi bi-house me-1"></i> Return to Home
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

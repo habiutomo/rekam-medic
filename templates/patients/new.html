@@ -1,0 +1,227 @@
+{% extends "layout.html" %}
+
+{% block page_actions %}
+<a href="{{ url_for('patients.index') }}" class="btn btn-outline-secondary">
+    <i class="bi bi-arrow-left me-1"></i> Back to Patients
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card shadow">
+            <div class="card-header">
+                <h5 class="mb-0">New Patient Registration</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="" class="needs-validation" novalidate>
+                    {{ form.hidden_tag() }}
+                    
+                    <!-- Personal Information Section -->
+                    <div class="mb-4">
+                        <h6 class="text-info mb-3">Personal Information</h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="first_name" class="form-label">{{ form.first_name.label }} <span class="text-danger">*</span></label>
+                                {% if form.first_name.errors %}
+                                    {{ form.first_name(class="form-control is-invalid") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.first_name.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.first_name(class="form-control") }}
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="last_name" class="form-label">{{ form.last_name.label }} <span class="text-danger">*</span></label>
+                                {% if form.last_name.errors %}
+                                    {{ form.last_name(class="form-control is-invalid") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.last_name.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.last_name(class="form-control") }}
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label for="date_of_birth" class="form-label">{{ form.date_of_birth.label }} <span class="text-danger">*</span></label>
+                                {% if form.date_of_birth.errors %}
+                                    {{ form.date_of_birth(class="form-control datepicker is-invalid") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.date_of_birth.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.date_of_birth(class="form-control datepicker") }}
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label for="gender" class="form-label">{{ form.gender.label }} <span class="text-danger">*</span></label>
+                                {% if form.gender.errors %}
+                                    {{ form.gender(class="form-select is-invalid") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.gender.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.gender(class="form-select") }}
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label for="blood_type" class="form-label">{{ form.blood_type.label }}</label>
+                                {% if form.blood_type.errors %}
+                                    {{ form.blood_type(class="form-select is-invalid") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.blood_type.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.blood_type(class="form-select") }}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Contact Information Section -->
+                    <div class="mb-4">
+                        <h6 class="text-info mb-3">Contact Information</h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="phone" class="form-label">{{ form.phone.label }}</label>
+                                {% if form.phone.errors %}
+                                    {{ form.phone(class="form-control is-invalid") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.phone.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.phone(class="form-control", placeholder="Enter phone number") }}
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="email" class="form-label">{{ form.email.label }}</label>
+                                {% if form.email.errors %}
+                                    {{ form.email(class="form-control is-invalid") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.email.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.email(class="form-control", placeholder="Enter email address") }}
+                                {% endif %}
+                            </div>
+                            <div class="col-12">
+                                <label for="address" class="form-label">{{ form.address.label }}</label>
+                                {% if form.address.errors %}
+                                    {{ form.address(class="form-control is-invalid", rows=3) }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.address.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.address(class="form-control", rows=3, placeholder="Enter full address") }}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Emergency Contact Section -->
+                    <div class="mb-4">
+                        <h6 class="text-info mb-3">Emergency Contact</h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="emergency_contact_name" class="form-label">{{ form.emergency_contact_name.label }}</label>
+                                {% if form.emergency_contact_name.errors %}
+                                    {{ form.emergency_contact_name(class="form-control is-invalid") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.emergency_contact_name.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.emergency_contact_name(class="form-control", placeholder="Enter emergency contact name") }}
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="emergency_contact_phone" class="form-label">{{ form.emergency_contact_phone.label }}</label>
+                                {% if form.emergency_contact_phone.errors %}
+                                    {{ form.emergency_contact_phone(class="form-control is-invalid") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.emergency_contact_phone.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.emergency_contact_phone(class="form-control", placeholder="Enter emergency contact phone") }}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Medical Information Section -->
+                    <div class="mb-4">
+                        <h6 class="text-info mb-3">Medical Information</h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="allergies" class="form-label">{{ form.allergies.label }}</label>
+                                {% if form.allergies.errors %}
+                                    {{ form.allergies(class="form-control is-invalid", rows=3) }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.allergies.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.allergies(class="form-control", rows=3, placeholder="List any allergies") }}
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="medical_conditions" class="form-label">{{ form.medical_conditions.label }}</label>
+                                {% if form.medical_conditions.errors %}
+                                    {{ form.medical_conditions(class="form-control is-invalid", rows=3) }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.medical_conditions.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.medical_conditions(class="form-control", rows=3, placeholder="List any existing medical conditions") }}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{{ url_for('patients.index') }}" class="btn btn-outline-secondary">Cancel</a>
+                        {{ form.submit(class="btn btn-info") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize date picker for date of birth
+    flatpickr(".datepicker", {
+        altInput: true,
+        altFormat: "F j, Y",
+        dateFormat: "Y-m-d",
+        maxDate: "today"
+    });
+});
+</script>
+{% endblock %}

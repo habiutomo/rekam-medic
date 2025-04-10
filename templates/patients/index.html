@@ -1,0 +1,251 @@
+{% extends "layout.html" %}
+
+{% block page_actions %}
+<a href="{{ url_for('patients.new_patient') }}" class="btn btn-info">
+    <i class="bi bi-person-plus me-1"></i> New Patient
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="card shadow mb-4">
+    <div class="card-header">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h5 class="mb-0">Patient Records</h5>
+            </div>
+            <div class="col-md-6">
+                <form method="GET" action="{{ url_for('patients.index') }}" class="d-flex">
+                    <div class="input-group">
+                        {{ search_form.search_term(class="form-control", placeholder="Search by name or phone...", value=search_term) }}
+                        <button type="submit" class="btn btn-outline-secondary">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        {% if patients.items %}
+        <div class="table-responsive">
+            <table class="table table-hover datatable" id="patientsTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Gender</th>
+                        <th>Age</th>
+                        <th>Phone</th>
+                        <th>Last Visit</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for patient in patients.items %}
+                    <tr>
+                        <td>{{ patient.id }}</td>
+                        <td>
+                            <a href="{{ url_for('patients.view_patient', patient_id=patient.id) }}" class="text-info text-decoration-none">
+                                {{ patient.last_name }}, {{ patient.first_name }}
+                            </a>
+                        </td>
+                        <td>{{ patient.gender }}</td>
+                        <td>{{ patient.get_age() }}</td>
+                        <td>{{ patient.phone or 'N/A' }}</td>
+                        <td>
+                            {% if patient.appointments %}
+                                {% set latest_appointment = patient.appointments|sort(attribute='date')|reverse|first %}
+                                {{ latest_appointment.date|format_date('%Y-%m-%d') }}
+                            {% else %}
+                                No visits
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group">
+                                <a href="{{ url_for('patients.view_patient', patient_id=patient.id) }}" class="btn btn-sm btn-outline-info">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="{{ url_for('patients.edit_patient', patient_id=patient.id) }}" class="btn btn-sm btn-outline-secondary">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a href="{{ url_for('appointments.new_appointment', patient_id=patient.id) }}" class="btn btn-sm btn-outline-secondary">
+                                    <i class="bi bi-calendar-plus"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination -->
+        <nav aria-label="Patient records navigation">
+            <ul class="pagination justify-content-center">
+                {% if patients.has_prev %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('patients.index', page=patients.prev_num, search_term=search_term) }}">
+                        <i class="bi bi-chevron-left"></i> Previous
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link"><i class="bi bi-chevron-left"></i> Previous</span>
+                </li>
+                {% endif %}
+                
+                {% for page_num in patients.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                    {% if page_num %}
+                        {% if patients.page == page_num %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ page_num }}</span>
+                        </li>
+                        {% else %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('patients.index', page=page_num, search_term=search_term) }}">
+                                {{ page_num }}
+                            </a>
+                        </li>
+                        {% endif %}
+                    {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">…</span>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if patients.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('patients.index', page=patients.next_num, search_term=search_term) }}">
+                        Next <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">Next <i class="bi bi-chevron-right"></i></span>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-search mb-3" style="font-size: 3rem;"></i>
+            <h4>No patients found</h4>
+            {% if search_term %}
+            <p class="text-muted">No results for "{{ search_term }}"</p>
+            <a href="{{ url_for('patients.index') }}" class="btn btn-outline-secondary mt-2">
+                Clear Search
+            </a>
+            {% else %}
+            <p class="text-muted">Start by adding a new patient record</p>
+            <a href="{{ url_for('patients.new_patient') }}" class="btn btn-info mt-2">
+                <i class="bi bi-person-plus me-1"></i> New Patient
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card shadow">
+            <div class="card-header">
+                <h5 class="mb-0">Patient Gender Distribution</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="genderChart" height="260"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-4">
+        <div class="card shadow">
+            <div class="card-header">
+                <h5 class="mb-0">Patient Age Distribution</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="ageChart" height="260"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize charts if patients exist
+    {% if patients.items %}
+    // Load patient demographics data
+    fetch('/api/patients/demographics')
+        .then(response => response.json())
+        .then(data => {
+            // Create gender chart
+            const genderCtx = document.getElementById('genderChart').getContext('2d');
+            new Chart(genderCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: data.gender.labels,
+                    datasets: [{
+                        data: data.gender.data,
+                        backgroundColor: [
+                            'rgba(13, 110, 253, 0.7)',   // Male
+                            'rgba(255, 99, 132, 0.7)',   // Female
+                            'rgba(108, 117, 125, 0.7)'   // Other
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right'
+                        }
+                    }
+                }
+            });
+            
+            // Create age chart
+            const ageCtx = document.getElementById('ageChart').getContext('2d');
+            new Chart(ageCtx, {
+                type: 'bar',
+                data: {
+                    labels: data.age.labels,
+                    datasets: [{
+                        label: 'Patients',
+                        data: data.age.data,
+                        backgroundColor: 'rgba(13, 110, 253, 0.7)',
+                        borderColor: 'rgba(13, 110, 253, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Number of Patients'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Age Group'
+                            }
+                        }
+                    }
+                }
+            });
+        })
+        .catch(error => {
+            console.error('Error loading demographics data:', error);
+        });
+    {% endif %}
+});
+</script>
+{% endblock %}

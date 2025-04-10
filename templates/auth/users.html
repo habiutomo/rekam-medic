@@ -1,0 +1,161 @@
+{% extends "layout.html" %}
+
+{% block page_actions %}
+<a href="{{ url_for('auth.register') }}" class="btn btn-info">
+    <i class="bi bi-person-plus me-1"></i> Create New User
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="card shadow">
+    <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">System Users</h5>
+            <div class="input-group" style="width: 250px;">
+                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                <input type="text" id="userSearchInput" class="form-control" placeholder="Search users...">
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover datatable" id="usersTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Full Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <td>{{ user.id }}</td>
+                        <td>{{ user.username }}</td>
+                        <td>{{ user.get_full_name() }}</td>
+                        <td>{{ user.email }}</td>
+                        <td>
+                            <span class="badge {% if user.role.name == 'admin' %}bg-danger{% elif user.role.name == 'doctor' %}bg-primary{% elif user.role.name == 'nurse' %}bg-success{% else %}bg-secondary{% endif %}">
+                                {{ user.role.name|capitalize }}
+                            </span>
+                        </td>
+                        <td>{{ user.created_at|format_date('%Y-%m-%d') }}</td>
+                        <td>
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-sm btn-outline-secondary" disabled>
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" disabled>
+                                    <i class="bi bi-key"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-header">
+                <h5 class="mb-0">User Role Distribution</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="userRoleChart" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-header">
+                <h5 class="mb-0">Recent User Activity</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group">
+                    {% for user in users[:5] %}
+                    <li class="list-group-item bg-dark">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>{{ user.username }}</strong>
+                                <span class="ms-2 badge bg-info">{{ user.role.name }}</span>
+                            </div>
+                            <span class="text-muted small">{{ user.updated_at|format_date('%Y-%m-%d %H:%M') }}</span>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Create role distribution chart
+    const ctx = document.getElementById('userRoleChart').getContext('2d');
+    
+    // Count users by role
+    const users = {{ users|tojson }};
+    const roleCounts = {};
+    
+    users.forEach(user => {
+        const role = user.role.name;
+        roleCounts[role] = (roleCounts[role] || 0) + 1;
+    });
+    
+    // Prepare chart data
+    const labels = Object.keys(roleCounts).map(role => role.charAt(0).toUpperCase() + role.slice(1));
+    const data = Object.values(roleCounts);
+    
+    // Define colors for roles
+    const backgroundColors = [
+        'rgba(220, 53, 69, 0.6)',   // admin (danger)
+        'rgba(13, 110, 253, 0.6)',   // doctor (primary)
+        'rgba(40, 167, 69, 0.6)',    // nurse (success)
+        'rgba(108, 117, 125, 0.6)',  // receptionist (secondary)
+        'rgba(255, 193, 7, 0.6)'     // other (warning)
+    ];
+    
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                backgroundColor: backgroundColors,
+                borderColor: backgroundColors.map(color => color.replace('0.6', '1')),
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'right',
+                },
+                title: {
+                    display: true,
+                    text: 'User Roles'
+                }
+            }
+        }
+    });
+    
+    // Search functionality
+    document.getElementById('userSearchInput').addEventListener('keyup', function() {
+        const table = $('#usersTable').DataTable();
+        table.search(this.value).draw();
+    });
+});
+</script>
+{% endblock %}

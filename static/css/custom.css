@@ -1,0 +1,173 @@
+/* Custom styles for RME system */
+
+/* Root Variables */
+:root {
+    --sidebar-width: 250px;
+}
+
+/* General styles */
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.footer {
+    margin-top: auto;
+}
+
+/* Sidebar styles */
+@media (min-width: 768px) {
+    .sidebar {
+        width: var(--sidebar-width);
+        position: fixed;
+        top: 56px;
+        bottom: 0;
+        left: 0;
+        z-index: 100;
+        padding: 0;
+        box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+        overflow-y: auto;
+    }
+    
+    .sidebar .nav-link {
+        font-weight: 500;
+        color: var(--bs-body-color);
+        padding: 0.5rem 1rem;
+    }
+    
+    .sidebar .nav-link:hover {
+        color: var(--bs-info);
+    }
+    
+    .sidebar .nav-link.active {
+        color: var(--bs-info);
+    }
+    
+    .cursor-pointer {
+        cursor: pointer;
+    }
+}
+
+/* Patient avatar */
+.patient-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background-color: var(--bs-dark);
+    border: 1px solid var(--bs-border-color);
+}
+
+/* Status badges */
+.status-scheduled {
+    background-color: #28a745;
+}
+.status-completed {
+    background-color: #007bff;
+}
+.status-cancelled {
+    background-color: #dc3545;
+}
+.status-no-show {
+    background-color: #ffc107;
+}
+
+/* Timeline styles */
+.timeline {
+    position: relative;
+    padding: 20px 0;
+}
+
+.timeline:before {
+    content: '';
+    position: absolute;
+    height: 100%;
+    width: 2px;
+    left: 50px;
+    top: 0;
+    background-color: var(--bs-border-color);
+}
+
+.timeline-item {
+    position: relative;
+    padding-left: 70px;
+    margin-bottom: 30px;
+}
+
+.timeline-date {
+    position: absolute;
+    left: 0;
+    width: 50px;
+    text-align: right;
+    font-weight: bold;
+    color: var(--bs-info);
+}
+
+.timeline-content {
+    position: relative;
+    padding: 15px;
+    background-color: var(--bs-dark);
+    border-radius: 4px;
+    border: 1px solid var(--bs-border-color);
+}
+
+.timeline-content:before {
+    content: '';
+    position: absolute;
+    left: -8px;
+    top: 15px;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background-color: var(--bs-info);
+}
+
+/* Animations */
+.fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Prescription styles */
+.prescription-header {
+    border-bottom: 2px solid var(--bs-info);
+}
+
+/* Dashboard cards */
+.dashboard-card {
+    transition: transform 0.2s ease;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-5px);
+}
+
+/* Print styles */
+@media print {
+    .sidebar, .navbar, .footer, .btn, .no-print {
+        display: none !important;
+    }
+    
+    main {
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    .card {
+        border: 1px solid #ddd !important;
+        box-shadow: none !important;
+    }
+    
+    body {
+        background-color: white;
+        color: black;
+    }
+}

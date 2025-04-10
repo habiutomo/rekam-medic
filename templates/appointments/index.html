@@ -1,0 +1,227 @@
+{% extends "layout.html" %}
+
+{% block page_actions %}
+<div class="btn-group">
+    <a href="{{ url_for('appointments.new_appointment') }}" class="btn btn-info">
+        <i class="bi bi-calendar-plus me-1"></i> New Appointment
+    </a>
+    <a href="{{ url_for('appointments.calendar') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-calendar3 me-1"></i> Calendar View
+    </a>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="card shadow mb-4">
+    <div class="card-header">
+        <div class="row align-items-center">
+            <div class="col-md-3">
+                <h5 class="mb-0">Appointments List</h5>
+            </div>
+            <div class="col-md-9">
+                <div class="d-flex justify-content-end gap-2">
+                    <div>
+                        <input type="date" id="appointmentDateFilter" class="form-control" placeholder="Filter by date">
+                    </div>
+                    <div>
+                        <select class="form-select" id="statusFilter">
+                            <option value="">All Statuses</option>
+                            <option value="scheduled">Scheduled</option>
+                            <option value="completed">Completed</option>
+                            <option value="cancelled">Cancelled</option>
+                            <option value="no-show">No Show</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        {% if appointments.items %}
+        <div class="table-responsive">
+            <table class="table table-hover datatable" id="appointmentsTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Patient</th>
+                        <th>Title</th>
+                        <th>Provider</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for appointment in appointments.items %}
+                    <tr>
+                        <td>{{ appointment.id }}</td>
+                        <td>{{ appointment.date|format_date('%Y-%m-%d') }}</td>
+                        <td>{{ appointment.start_time|format_date('%H:%M') }} - {{ appointment.end_time|format_date('%H:%M') }}</td>
+                        <td>
+                            <a href="{{ url_for('patients.view_patient', patient_id=appointment.patient_id) }}" class="text-info text-decoration-none">
+                                {{ appointment.patient.last_name }}, {{ appointment.patient.first_name }}
+                            </a>
+                        </td>
+                        <td>{{ appointment.title }}</td>
+                        <td>{{ appointment.staff.get_full_name() }}</td>
+                        <td>
+                            <span class="badge bg-{{ 
+                                'success' if appointment.status == 'scheduled' else 
+                                'primary' if appointment.status == 'completed' else 
+                                'danger' if appointment.status == 'cancelled' else 
+                                'warning' }}">
+                                {{ appointment.status|capitalize }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="btn-group">
+                                <a href="{{ url_for('appointments.edit_appointment', appointment_id=appointment.id) }}" class="btn btn-sm btn-outline-secondary">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a href="{{ url_for('clinical.new_note', patient_id=appointment.patient_id) }}" class="btn btn-sm btn-outline-info">
+                                    <i class="bi bi-journal-plus"></i>
+                                </a>
+                                <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteAppointmentModal{{ appointment.id }}">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                            
+                            <!-- Delete Modal -->
+                            <div class="modal fade" id="deleteAppointmentModal{{ appointment.id }}" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Confirm Deletion</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <p>Are you sure you want to delete this appointment?</p>
+                                            <p class="mb-0"><strong>Date:</strong> {{ appointment.date|format_date('%Y-%m-%d') }}</p>
+                                            <p class="mb-0"><strong>Time:</strong> {{ appointment.start_time|format_date('%H:%M') }} - {{ appointment.end_time|format_date('%H:%M') }}</p>
+                                            <p class="mb-0"><strong>Patient:</strong> {{ appointment.patient.get_full_name() }}</p>
+                                            <p><strong>Title:</strong> {{ appointment.title }}</p>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                                            <form action="{{ url_for('appointments.delete_appointment', appointment_id=appointment.id) }}" method="POST">
+                                                <button type="submit" class="btn btn-danger">Delete Appointment</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination -->
+        <nav aria-label="Appointment records navigation">
+            <ul class="pagination justify-content-center">
+                {% if appointments.has_prev %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('appointments.index', page=appointments.prev_num) }}">
+                        <i class="bi bi-chevron-left"></i> Previous
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link"><i class="bi bi-chevron-left"></i> Previous</span>
+                </li>
+                {% endif %}
+                
+                {% for page_num in appointments.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                    {% if page_num %}
+                        {% if appointments.page == page_num %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ page_num }}</span>
+                        </li>
+                        {% else %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('appointments.index', page=page_num) }}">
+                                {{ page_num }}
+                            </a>
+                        </li>
+                        {% endif %}
+                    {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">…</span>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if appointments.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('appointments.index', page=appointments.next_num) }}">
+                        Next <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">Next <i class="bi bi-chevron-right"></i></span>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-calendar2-x mb-3" style="font-size: 3rem;"></i>
+            <h4>No appointments found</h4>
+            <p class="text-muted">Start by scheduling a new appointment</p>
+            <a href="{{ url_for('appointments.new_appointment') }}" class="btn btn-info mt-2">
+                <i class="bi bi-calendar-plus me-1"></i> New Appointment
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card shadow">
+            <div class="card-header">
+                <h5 class="mb-0">Upcoming Appointments</h5>
+            </div>
+            <div class="card-body">
+                <div id="appointmentsChartContainer" class="chart-container">
+                    <canvas id="appointmentsChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-4">
+        <div class="card shadow">
+            <div class="card-header">
+                <h5 class="mb-0">Appointment Status Distribution</h5>
+            </div>
+            <div class="card-body">
+                <div id="appointmentStatusChartContainer" class="chart-container">
+                    <canvas id="appointmentStatusChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Status filter
+    const statusFilter = document.getElementById('statusFilter');
+    statusFilter.addEventListener('change', function() {
+        const table = $('#appointmentsTable').DataTable();
+        table.column(6).search(this.value).draw();
+    });
+    
+    // Initialize charts if appointments exist
+    {% if appointments.items %}
+    loadAppointmentsChart();
+    loadAppointmentStatusChart();
+    {% endif %}
+});
+</script>
+{% endblock %}

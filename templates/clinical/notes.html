@@ -1,0 +1,240 @@
+{% extends "layout.html" %}
+
+{% block page_actions %}
+<div class="btn-group">
+    <a href="{{ url_for('clinical.new_note', patient_id=patient.id if patient else '') }}" class="btn btn-info">
+        <i class="bi bi-journal-plus me-1"></i> New Clinical Note
+    </a>
+    {% if patient %}
+    <a href="{{ url_for('patients.view_patient', patient_id=patient.id) }}" class="btn btn-outline-secondary">
+        <i class="bi bi-person me-1"></i> Patient Profile
+    </a>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="card shadow mb-4">
+    {% if patient %}
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Clinical Notes - {{ patient.get_full_name() }}</h5>
+        <span class="badge bg-info">Patient ID: {{ patient.id }}</span>
+    </div>
+    {% else %}
+    <div class="card-header">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h5 class="mb-0">All Clinical Notes</h5>
+            </div>
+            <div class="col-md-6">
+                <select class="form-select float-end" style="width: auto;" id="noteTypeFilter">
+                    <option value="">All Note Types</option>
+                    <option value="progress">Progress Notes</option>
+                    <option value="admission">Admission Notes</option>
+                    <option value="discharge">Discharge Summary</option>
+                    <option value="consultation">Consultation</option>
+                    <option value="procedure">Procedure Notes</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    <div class="card-body">
+        {% if notes.items %}
+        <div class="table-responsive">
+            <table class="table table-hover datatable" id="notesTable">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Type</th>
+                        {% if not patient %}
+                        <th>Patient</th>
+                        {% endif %}
+                        <th>Author</th>
+                        <th>Content</th>
+                        <th>Diagnosis</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for note in notes.items %}
+                    <tr>
+                        <td>{{ note.created_at|format_date('%Y-%m-%d %H:%M') }}</td>
+                        <td>{{ note.note_type|capitalize }}</td>
+                        {% if not patient %}
+                        <td>
+                            <a href="{{ url_for('patients.view_patient', patient_id=note.patient_id) }}" class="text-info text-decoration-none">
+                                {{ note.patient.last_name }}, {{ note.patient.first_name }}
+                            </a>
+                        </td>
+                        {% endif %}
+                        <td>{{ note.author.get_full_name() }}</td>
+                        <td>{{ note.content|truncate(50) }}</td>
+                        <td>{{ note.diagnosis|truncate(50) if note.diagnosis else 'N/A' }}</td>
+                        <td>
+                            <div class="btn-group">
+                                <a href="{{ url_for('clinical.view_note', note_id=note.id) }}" class="btn btn-sm btn-outline-info">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="{{ url_for('clinical.edit_note', note_id=note.id) }}" class="btn btn-sm btn-outline-secondary">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination -->
+        <nav aria-label="Clinical notes navigation">
+            <ul class="pagination justify-content-center">
+                {% if notes.has_prev %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('clinical.notes', page=notes.prev_num, patient_id=patient.id if patient else '') }}">
+                        <i class="bi bi-chevron-left"></i> Previous
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link"><i class="bi bi-chevron-left"></i> Previous</span>
+                </li>
+                {% endif %}
+                
+                {% for page_num in notes.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                    {% if page_num %}
+                        {% if notes.page == page_num %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ page_num }}</span>
+                        </li>
+                        {% else %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('clinical.notes', page=page_num, patient_id=patient.id if patient else '') }}">
+                                {{ page_num }}
+                            </a>
+                        </li>
+                        {% endif %}
+                    {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">…</span>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if notes.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('clinical.notes', page=notes.next_num, patient_id=patient.id if patient else '') }}">
+                        Next <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">Next <i class="bi bi-chevron-right"></i></span>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-journal-x mb-3" style="font-size: 3rem;"></i>
+            <h4>No clinical notes found</h4>
+            {% if patient %}
+            <p class="text-muted">No clinical notes have been recorded for this patient</p>
+            <a href="{{ url_for('clinical.new_note', patient_id=patient.id) }}" class="btn btn-info mt-2">
+                <i class="bi bi-journal-plus me-1"></i> Create First Note
+            </a>
+            {% else %}
+            <p class="text-muted">No clinical notes have been recorded in the system</p>
+            <a href="{{ url_for('clinical.new_note') }}" class="btn btn-info mt-2">
+                <i class="bi bi-journal-plus me-1"></i> Create First Note
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% if notes.items %}
+<div class="row">
+    <div class="col-md-12 mb-4">
+        <div class="card shadow">
+            <div class="card-header">
+                <h5 class="mb-0">Note Types Distribution</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="noteTypesChart" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{% if notes.items %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Note type filter
+    const noteTypeFilter = document.getElementById('noteTypeFilter');
+    if (noteTypeFilter) {
+        noteTypeFilter.addEventListener('change', function() {
+            const table = $('#notesTable').DataTable();
+            table.column(1).search(this.value).draw();
+        });
+    }
+    
+    // Initialize note types chart
+    const ctx = document.getElementById('noteTypesChart').getContext('2d');
+    
+    // Count notes by type
+    const notesData = {{ notes.items|tojson }};
+    const noteTypes = {};
+    
+    notesData.forEach(note => {
+        noteTypes[note.note_type] = (noteTypes[note.note_type] || 0) + 1;
+    });
+    
+    // Prepare chart data
+    const labels = Object.keys(noteTypes).map(type => type.charAt(0).toUpperCase() + type.slice(1));
+    const data = Object.values(noteTypes);
+    
+    // Define colors for note types
+    const backgroundColors = [
+        'rgba(40, 167, 69, 0.6)',   // green
+        'rgba(0, 123, 255, 0.6)',   // blue
+        'rgba(220, 53, 69, 0.6)',   // red
+        'rgba(255, 193, 7, 0.6)',   // yellow
+        'rgba(111, 66, 193, 0.6)',  // purple
+        'rgba(23, 162, 184, 0.6)'   // cyan
+    ];
+    
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Number of Notes',
+                data: data,
+                backgroundColor: backgroundColors,
+                borderColor: backgroundColors.map(color => color.replace('0.6', '1')),
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        precision: 0
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+{% endif %}
+{% endblock %}

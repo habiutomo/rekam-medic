@@ -1,0 +1,61 @@
+{% extends "layout.html" %}
+{% set hide_title = true %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow fade-in">
+            <div class="card-header text-center py-3">
+                <h4 class="mb-0">
+                    <i class="bi bi-clipboard2-pulse me-2"></i>RME Login
+                </h4>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" action="">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="mb-3">
+                        <label for="username" class="form-label">{{ form.username.label }}</label>
+                        {% if form.username.errors %}
+                            {{ form.username(class="form-control is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.username.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.username(class="form-control", placeholder="Enter username") }}
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="password" class="form-label">{{ form.password.label }}</label>
+                        {% if form.password.errors %}
+                            {{ form.password(class="form-control is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.password.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.password(class="form-control", placeholder="Enter password") }}
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3 form-check">
+                        {{ form.remember(class="form-check-input") }}
+                        <label class="form-check-label" for="remember">{{ form.remember.label }}</label>
+                    </div>
+                    
+                    <div class="d-grid">
+                        {{ form.submit(class="btn btn-info btn-lg") }}
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer text-center py-3">
+                <small class="text-muted">Rekam Medis Elektronik - Electronic Medical Records System</small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

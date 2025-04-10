@@ -1,0 +1,160 @@
+{% extends "layout.html" %}
+
+{% block page_actions %}
+<div class="btn-group">
+    <a href="{{ url_for('patients.view_patient', patient_id=patient.id) }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i> Back to Patient
+    </a>
+    <a href="{{ url_for('clinical.new_note', patient_id=patient.id) }}" class="btn btn-info">
+        <i class="bi bi-journal-plus me-1"></i> New Clinical Note
+    </a>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="card shadow mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Diagnoses History - {{ patient.get_full_name() }}</h5>
+        <span class="badge bg-info">Patient ID: {{ patient.id }}</span>
+    </div>
+    <div class="card-body">
+        {% if notes %}
+        <div class="table-responsive">
+            <table class="table table-hover datatable" id="diagnosisTable">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Diagnosis</th>
+                        <th>Treatment Plan</th>
+                        <th>Provider</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for note in notes %}
+                    <tr>
+                        <td>{{ note.created_at|format_date('%Y-%m-%d') }}</td>
+                        <td>{{ note.diagnosis|truncate(100) }}</td>
+                        <td>{{ note.treatment_plan|truncate(100) if note.treatment_plan else 'N/A' }}</td>
+                        <td>{{ note.author.get_full_name() }}</td>
+                        <td>
+                            <a href="{{ url_for('clinical.view_note', note_id=note.id) }}" class="btn btn-sm btn-outline-info">
+                                <i class="bi bi-eye me-1"></i> View Full Note
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Diagnosis Summary -->
+        <div class="mt-4">
+            <h5 class="text-info mb-3">Diagnosis Summary</h5>
+            <div class="list-group">
+                {% for note in notes %}
+                <div class="list-group-item list-group-item-action bg-dark border-secondary">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h6 class="mb-1">{{ note.created_at|format_date('%Y-%m-%d') }}</h6>
+                        <small>{{ note.note_type|capitalize }} Note</small>
+                    </div>
+                    <p class="mb-1">{{ note.diagnosis }}</p>
+                    <div class="d-flex w-100 justify-content-between align-items-center mt-2">
+                        <small class="text-muted">Provider: {{ note.author.get_full_name() }}</small>
+                        <a href="{{ url_for('clinical.view_note', note_id=note.id) }}" class="btn btn-sm btn-outline-info">
+                            <i class="bi bi-eye me-1"></i> Details
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-clipboard2-x mb-3" style="font-size: 3rem;"></i>
+            <h4>No diagnoses found</h4>
+            <p class="text-muted">No diagnoses have been recorded for this patient</p>
+            <a href="{{ url_for('clinical.new_note', patient_id=patient.id) }}" class="btn btn-info mt-2">
+                <i class="bi bi-journal-plus me-1"></i> Create Clinical Note
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% if notes %}
+<div class="row">
+    <div class="col-md-12 mb-4">
+        <div class="card shadow">
+            <div class="card-header">
+                <h5 class="mb-0">Diagnosis Timeline</h5>
+            </div>
+            <div class="card-body">
+                <div class="timeline">
+                    {% for note in notes %}
+                    <div class="timeline-item">
+                        <div class="timeline-date">{{ note.created_at|format_date('%b %d, %Y') }}</div>
+                        <div class="timeline-content">
+                            <div class="d-flex">
+                                <i class="bi bi-clipboard2-pulse text-info me-2" style="font-size: 1.5rem;"></i>
+                                <div>
+                                    <h6>{{ note.note_type|capitalize }} Note</h6>
+                                    <p>{{ note.diagnosis|truncate(200) }}</p>
+                                    {% if note.treatment_plan %}
+                                    <div class="alert alert-dark p-2 my-2">
+                                        <strong>Treatment Plan:</strong> {{ note.treatment_plan|truncate(150) }}
+                                    </div>
+                                    {% endif %}
+                                    <small class="text-muted">Provider: {{ note.author.get_full_name() }}</small>
+                                    <div class="mt-2">
+                                        <a href="{{ url_for('clinical.view_note', note_id=note.id) }}" class="btn btn-sm btn-outline-info">
+                                            <i class="bi bi-eye me-1"></i> View Full Note
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Actions Card -->
+<div class="card shadow">
+    <div class="card-header">
+        <h5 class="mb-0">Related Actions</h5>
+    </div>
+    <div class="card-body">
+        <div class="row text-center">
+            <div class="col-md-3 mb-3">
+                <a href="{{ url_for('prescriptions.new_prescription', patient_id=patient.id) }}" class="btn btn-outline-info w-100 h-100 py-3">
+                    <i class="bi bi-prescription d-block mb-2" style="font-size: 1.5rem;"></i>
+                    Create Prescription
+                </a>
+            </div>
+            <div class="col-md-3 mb-3">
+                <a href="{{ url_for('laboratory.new_result', patient_id=patient.id) }}" class="btn btn-outline-info w-100 h-100 py-3">
+                    <i class="bi bi-flask d-block mb-2" style="font-size: 1.5rem;"></i>
+                    Order Lab Test
+                </a>
+            </div>
+            <div class="col-md-3 mb-3">
+                <a href="{{ url_for('appointments.new_appointment', patient_id=patient.id) }}" class="btn btn-outline-info w-100 h-100 py-3">
+                    <i class="bi bi-calendar-plus d-block mb-2" style="font-size: 1.5rem;"></i>
+                    Schedule Follow-up
+                </a>
+            </div>
+            <div class="col-md-3 mb-3">
+                <a href="{{ url_for('clinical.new_note', patient_id=patient.id) }}" class="btn btn-outline-info w-100 h-100 py-3">
+                    <i class="bi bi-journal-plus d-block mb-2" style="font-size: 1.5rem;"></i>
+                    New Clinical Note
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

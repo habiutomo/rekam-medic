@@ -1,0 +1,306 @@
+{% extends "layout.html" %}
+
+{% block page_actions %}
+<div class="btn-group">
+    <a href="{{ url_for('prescriptions.new_prescription', patient_id=patient.id if patient else '') }}" class="btn btn-info">
+        <i class="bi bi-prescription me-1"></i> New Prescription
+    </a>
+    {% if patient %}
+    <a href="{{ url_for('patients.view_patient', patient_id=patient.id) }}" class="btn btn-outline-secondary">
+        <i class="bi bi-person me-1"></i> Patient Profile
+    </a>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="card shadow mb-4">
+    {% if patient %}
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Prescriptions - {{ patient.get_full_name() }}</h5>
+        <span class="badge bg-info">Patient ID: {{ patient.id }}</span>
+    </div>
+    {% else %}
+    <div class="card-header">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h5 class="mb-0">All Prescriptions</h5>
+            </div>
+            <div class="col-md-6">
+                <select class="form-select float-end" style="width: auto;" id="statusFilter">
+                    <option value="">All Statuses</option>
+                    <option value="active">Active</option>
+                    <option value="completed">Completed</option>
+                    <option value="cancelled">Cancelled</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    <div class="card-body">
+        {% if prescriptions.items %}
+        <div class="table-responsive">
+            <table class="table table-hover datatable" id="prescriptionsTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Date</th>
+                        {% if not patient %}
+                        <th>Patient</th>
+                        {% endif %}
+                        <th>Medications</th>
+                        <th>Prescribed By</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for prescription in prescriptions.items %}
+                    <tr>
+                        <td>{{ prescription.id }}</td>
+                        <td>{{ prescription.prescription_date|format_date('%Y-%m-%d') }}</td>
+                        {% if not patient %}
+                        <td>
+                            <a href="{{ url_for('patients.view_patient', patient_id=prescription.patient_id) }}" class="text-info text-decoration-none">
+                                {{ prescription.patient.last_name }}, {{ prescription.patient.first_name }}
+                            </a>
+                        </td>
+                        {% endif %}
+                        <td>
+                            {% if prescription.items %}
+                                {% for item in prescription.items %}
+                                <span class="badge bg-info">{{ item.medication.name }}</span>
+                                {% endfor %}
+                            {% else %}
+                                <span class="text-muted">No medications</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ prescription.prescribed_by.get_full_name() }}</td>
+                        <td>
+                            <span class="badge bg-{{ 
+                                'success' if prescription.status == 'active' else 
+                                'primary' if prescription.status == 'completed' else 
+                                'danger' }}">
+                                {{ prescription.status|capitalize }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="btn-group">
+                                <a href="{{ url_for('prescriptions.view_prescription', prescription_id=prescription.id) }}" class="btn btn-sm btn-outline-info">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="{{ url_for('prescriptions.edit_prescription', prescription_id=prescription.id) }}" class="btn btn-sm btn-outline-secondary">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                {% if prescription.items|length == 0 %}
+                                <a href="{{ url_for('prescriptions.add_item', prescription_id=prescription.id) }}" class="btn btn-sm btn-outline-success">
+                                    <i class="bi bi-plus-lg"></i>
+                                </a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination -->
+        <nav aria-label="Prescription navigation">
+            <ul class="pagination justify-content-center">
+                {% if prescriptions.has_prev %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('prescriptions.index', page=prescriptions.prev_num, patient_id=patient.id if patient else '') }}">
+                        <i class="bi bi-chevron-left"></i> Previous
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link"><i class="bi bi-chevron-left"></i> Previous</span>
+                </li>
+                {% endif %}
+                
+                {% for page_num in prescriptions.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                    {% if page_num %}
+                        {% if prescriptions.page == page_num %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ page_num }}</span>
+                        </li>
+                        {% else %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('prescriptions.index', page=page_num, patient_id=patient.id if patient else '') }}">
+                                {{ page_num }}
+                            </a>
+                        </li>
+                        {% endif %}
+                    {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">…</span>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if prescriptions.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('prescriptions.index', page=prescriptions.next_num, patient_id=patient.id if patient else '') }}">
+                        Next <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">Next <i class="bi bi-chevron-right"></i></span>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-prescription mb-3" style="font-size: 3rem;"></i>
+            <h4>No prescriptions found</h4>
+            {% if patient %}
+            <p class="text-muted">No prescriptions have been created for this patient</p>
+            <a href="{{ url_for('prescriptions.new_prescription', patient_id=patient.id) }}" class="btn btn-info mt-2">
+                <i class="bi bi-prescription me-1"></i> Create First Prescription
+            </a>
+            {% else %}
+            <p class="text-muted">No prescriptions have been created in the system</p>
+            <a href="{{ url_for('prescriptions.new_prescription') }}" class="btn btn-info mt-2">
+                <i class="bi bi-prescription me-1"></i> Create First Prescription
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% if prescriptions.items %}
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card shadow">
+            <div class="card-header">
+                <h5 class="mb-0">Prescription Status Distribution</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="prescriptionStatusChart" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-4">
+        <div class="card shadow">
+            <div class="card-header">
+                <h5 class="mb-0">Most Prescribed Medications</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="medicationsChart" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{% if prescriptions.items %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Status filter
+    const statusFilter = document.getElementById('statusFilter');
+    if (statusFilter) {
+        statusFilter.addEventListener('change', function() {
+            const table = $('#prescriptionsTable').DataTable();
+            table.column({% if patient %}5{% else %}6{% endif %}).search(this.value).draw();
+        });
+    }
+    
+    // Initialize prescription status chart
+    const statusCtx = document.getElementById('prescriptionStatusChart').getContext('2d');
+    
+    // Count prescriptions by status
+    const prescriptions = {{ prescriptions.items|tojson }};
+    const statusCounts = {
+        'active': 0,
+        'completed': 0,
+        'cancelled': 0
+    };
+    
+    prescriptions.forEach(prescription => {
+        statusCounts[prescription.status] = (statusCounts[prescription.status] || 0) + 1;
+    });
+    
+    // Create chart
+    new Chart(statusCtx, {
+        type: 'pie',
+        data: {
+            labels: ['Active', 'Completed', 'Cancelled'],
+            datasets: [{
+                data: [statusCounts.active, statusCounts.completed, statusCounts.cancelled],
+                backgroundColor: [
+                    'rgba(40, 167, 69, 0.7)',  // green for active
+                    'rgba(0, 123, 255, 0.7)',  // blue for completed
+                    'rgba(220, 53, 69, 0.7)'   // red for cancelled
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'right'
+                }
+            }
+        }
+    });
+    
+    // Medication statistics
+    const medCtx = document.getElementById('medicationsChart').getContext('2d');
+    
+    // Count medications
+    const medicationCounts = {};
+    
+    prescriptions.forEach(prescription => {
+        if (prescription.items) {
+            prescription.items.forEach(item => {
+                const medName = item.medication.name;
+                medicationCounts[medName] = (medicationCounts[medName] || 0) + 1;
+            });
+        }
+    });
+    
+    // Sort medications by count and get top 5
+    const sortedMeds = Object.entries(medicationCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5);
+    
+    const medNames = sortedMeds.map(item => item[0]);
+    const medCounts = sortedMeds.map(item => item[1]);
+    
+    // Create chart
+    new Chart(medCtx, {
+        type: 'bar',
+        data: {
+            labels: medNames,
+            datasets: [{
+                label: 'Times Prescribed',
+                data: medCounts,
+                backgroundColor: 'rgba(23, 162, 184, 0.7)',
+                borderColor: 'rgba(23, 162, 184, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        precision: 0
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+{% endif %}
+{% endblock %}

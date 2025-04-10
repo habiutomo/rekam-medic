@@ -1,0 +1,120 @@
+{% extends "layout.html" %}
+
+{% block page_actions %}
+<a href="{{ url_for('clinical.notes', patient_id=request.args.get('patient_id', '')) }}" class="btn btn-outline-secondary">
+    <i class="bi bi-arrow-left me-1"></i> Back to Notes
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card shadow">
+            <div class="card-header">
+                <h5 class="mb-0">Create New Clinical Note</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="patient_id" class="form-label">{{ form.patient_id.label }} <span class="text-danger">*</span></label>
+                            {% if form.patient_id.errors %}
+                                {{ form.patient_id(class="form-select is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.patient_id.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.patient_id(class="form-select") }}
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="note_type" class="form-label">{{ form.note_type.label }} <span class="text-danger">*</span></label>
+                            {% if form.note_type.errors %}
+                                {{ form.note_type(class="form-select is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.note_type.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.note_type(class="form-select") }}
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="content" class="form-label">{{ form.content.label }} <span class="text-danger">*</span></label>
+                        {% if form.content.errors %}
+                            {{ form.content(class="form-control is-invalid", rows=8) }}
+                            <div class="invalid-feedback">
+                                {% for error in form.content.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.content(class="form-control", rows=8, placeholder="Enter detailed clinical notes") }}
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="diagnosis" class="form-label">{{ form.diagnosis.label }}</label>
+                        {% if form.diagnosis.errors %}
+                            {{ form.diagnosis(class="form-control is-invalid", rows=3) }}
+                            <div class="invalid-feedback">
+                                {% for error in form.diagnosis.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.diagnosis(class="form-control", rows=3, placeholder="Enter diagnosis if applicable") }}
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="treatment_plan" class="form-label">{{ form.treatment_plan.label }}</label>
+                        {% if form.treatment_plan.errors %}
+                            {{ form.treatment_plan(class="form-control is-invalid", rows=3) }}
+                            <div class="invalid-feedback">
+                                {% for error in form.treatment_plan.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.treatment_plan(class="form-control", rows=3, placeholder="Enter treatment plan if applicable") }}
+                        {% endif %}
+                    </div>
+                    
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{{ url_for('clinical.notes', patient_id=request.args.get('patient_id', '')) }}" class="btn btn-outline-secondary">Cancel</a>
+                        <div>
+                            <button type="submit" class="btn btn-outline-secondary me-2" name="save_draft">Save as Draft</button>
+                            {{ form.submit(class="btn btn-info") }}
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add auto-resize functionality to textareas
+    const textareas = document.querySelectorAll('textarea');
+    textareas.forEach(textarea => {
+        textarea.style.height = 'auto';
+        textarea.style.height = (textarea.scrollHeight) + 'px';
+        textarea.addEventListener('input', e => {
+            textarea.style.height = 'auto';
+            textarea.style.height = (textarea.scrollHeight) + 'px';
+        });
+    });
+});
+</script>
+{% endblock %}
