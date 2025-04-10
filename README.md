@@ -2,6 +2,9 @@
 
 A comprehensive Electronic Medical Records (RME) system that allows healthcare providers to manage patient information, appointments, prescriptions, clinical notes, lab results, and more.
 
+![Alt Text](1.png)
+![Alt Text](2.png)
+
 ## Features
 
 - **User Management**: Role-based access control with different user roles (admin, doctor, nurse, receptionist, lab technician, billing staff)
